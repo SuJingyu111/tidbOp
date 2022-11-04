@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"time"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -78,6 +79,10 @@ func (r *TidbopReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		instance.Spec.Imagename = defaultTidbImage
 	}
 
+	if instance.Spec.HealthCheckInterval == 0 {
+		instance.Spec.HealthCheckInterval = 5
+	}
+
 	switch instance.Status.Phase {
 	case tidbopv1alpha1.PhasePending:
 		logger.Info("Phase: PENDING for creation, now will create")
@@ -102,7 +107,11 @@ func (r *TidbopReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			}
 			logger.Info("Pod Created successfully", "name", pod.Name)
 			instance.Status.Phase = tidbopv1alpha1.PhaseRunning
-			return ctrl.Result{}, nil
+			err = r.UpdateInstanceStatus(&ctx, instance)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: time.Duration(instance.Spec.HealthCheckInterval) * time.Second}, nil
 		} else if err != nil {
 			// requeue with err
 			logger.Error(err, "cannot create pod")
@@ -140,7 +149,11 @@ func (r *TidbopReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			}
 			logger.Info("Pod Created successfully", "name", pod.Name)
 			instance.Status.Phase = tidbopv1alpha1.PhaseRunning
-			return ctrl.Result{}, nil
+			err = r.UpdateInstanceStatus(&ctx, instance)
+			if err != nil {
+				return ctrl.Result{}, err
+			}
+			return ctrl.Result{RequeueAfter: time.Duration(instance.Spec.HealthCheckInterval) * time.Second}, nil
 		} else if err != nil {
 			// requeue with err
 			logger.Error(err, "cannot create pod")
@@ -156,7 +169,7 @@ func (r *TidbopReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			instance.Status.Phase = tidbopv1alpha1.PhasePending
 		} else {
 			//Pod already exist and running, do nothing
-			return ctrl.Result{}, nil
+			return ctrl.Result{RequeueAfter: time.Duration(instance.Spec.HealthCheckInterval) * time.Second}, nil
 		}
 	default:
 		logger.Info("ERROR: Unknown phase")
@@ -164,7 +177,7 @@ func (r *TidbopReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 
 	// update status
-	err = r.Status().Update(context.TODO(), instance)
+	err = r.UpdateInstanceStatus(&ctx, instance)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -177,4 +190,9 @@ func (r *TidbopReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&tidbopv1alpha1.Tidbop{}).
 		Complete(r)
+}
+
+// SetupWithManager sets up the controller with the Manager.
+func (r *TidbopReconciler) UpdateInstanceStatus(ctx *context.Context, instance *tidbopv1alpha1.Tidbop) error {
+	return r.Status().Update(context.TODO(), instance)
 }
