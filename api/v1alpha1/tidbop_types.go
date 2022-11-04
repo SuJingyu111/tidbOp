@@ -35,7 +35,7 @@ type TidbopSpec struct {
 	// Important: Run "make" to regenerate code after modifying this file
 
 	// Foo is an example field of Tidbop. Edit tidbop_types.go to remove/update
-	ImageName string `json:"imagename,omitempty"`
+	Imagename string `json:"imagename,omitempty"`
 }
 
 // TidbopStatus defines the observed state of Tidbop

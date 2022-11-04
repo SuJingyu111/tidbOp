@@ -22,13 +22,13 @@ func NewPodForCR(cr *tidbopv1alpha1.Tidbop) *corev1.Pod {
 			Containers: []corev1.Container{
 				{
 					Name:  "tidb",
-					Image: cr.Spec.ImageName,
+					Image: cr.Spec.Imagename,
 					Ports: []corev1.ContainerPort{
 						{
 							ContainerPort: 20160,
 						},
 					},
-					Args: []string{"--pd=http://pd-service"},
+					Args: []string{"--path=http://pd-service"},
 				},
 			},
 			RestartPolicy: corev1.RestartPolicyOnFailure,

@@ -37,7 +37,7 @@ type TidbopReconciler struct {
 	Scheme *runtime.Scheme
 }
 
-const latestTidbImage string = "pingcap/tidb:latest"
+const defaultTidbImage string = "pingcap/tidb:latest"
 
 //+kubebuilder:rbac:groups=tidbop.cs528,resources=tidbops,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=tidbop.cs528,resources=tidbops/status,verbs=get;update;patch
@@ -74,8 +74,8 @@ func (r *TidbopReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		instance.Status.Phase = tidbopv1alpha1.PhasePending
 	}
 
-	if instance.Spec.ImageName == "" {
-		instance.Spec.ImageName = latestTidbImage
+	if instance.Spec.Imagename == "" {
+		instance.Spec.Imagename = defaultTidbImage
 	}
 
 	switch instance.Status.Phase {

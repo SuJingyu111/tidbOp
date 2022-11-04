@@ -1,0 +1,7 @@
+---
+apiVersion: tidbop.cs528/v1alpha1
+kind: Tidbop
+metadata:
+  name: tidb
+spec:
+  imagename: pingcap/tidb:latest
