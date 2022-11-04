@@ -34,8 +34,11 @@ type TidbopSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
 
-	// Foo is an example field of Tidbop. Edit tidbop_types.go to remove/update
+	// Imagename is the name of image this Tidb instance is using
 	Imagename string `json:"imagename,omitempty"`
+
+	// HealthCheckInterval is the interval for periodic health check, if pod failed/deleted, it should recreate the pod
+	HealthCheckInterval int `json:"healthcheck.interval,omitempty"`
 }
 
 // TidbopStatus defines the observed state of Tidbop

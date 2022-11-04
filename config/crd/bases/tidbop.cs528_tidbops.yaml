@@ -35,9 +35,13 @@ spec:
           spec:
             description: TidbopSpec defines the desired state of Tidbop
             properties:
+              healthcheck.interval:
+                description: HealthCheckInterval is the interval for periodic health
+                  check, if pod failed/deleted, it should recreate the pod
+                type: integer
               imagename:
-                description: Foo is an example field of Tidbop. Edit tidbop_types.go
-                  to remove/update
+                description: Imagename is the name of image this Tidb instance is
+                  using
                 type: string
             type: object
           status:
